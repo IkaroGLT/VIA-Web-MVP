@@ -1,0 +1,8 @@
+
+{
+  "functions": {
+    "api/describe.ts": {
+      "maxDuration": 40
+    }
+  }
+}
