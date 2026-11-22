@@ -14,7 +14,6 @@
  * Se a variável não existir, o registro só aparece no console (não quebra nada).
  */
 
-import { USAR_SIMULADO } from './api'
 import type { RegistroPedido } from './fluxo'
 
 /** Mude a cada rodada de teste, para separar os dados no relatório (ex.: 'rodada-1', 'rodada-2'). */
@@ -40,7 +39,7 @@ export function enviarRegistro(registro: RegistroPedido): void {
     ...registro,
     participante: lerParticipante(),
     sessao: SESSAO,
-    simulado: USAR_SIMULADO,
+    simulado: false, // coluna mantida na planilha; o modo simulado foi removido na integração
     versao: VERSAO_APP,
   }
 

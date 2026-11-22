@@ -3,7 +3,7 @@
  *
  * - Os do backend copiam exatamente a tabela do contrato (docs/contrato-api.md, seção 5.2).
  *   Se o contrato mudar, atualize aqui também.
- * - Os do frontend são erros que acontecem no celular (sem internet, câmera).
+ * - Os do frontend são erros que acontecem no celular (sem internet, erro desconhecido).
  */
 export type CodigoErroBackend =
   | 'INVALID_REQUEST'
@@ -16,6 +16,6 @@ export type CodigoErroBackend =
   | 'AI_TIMEOUT'
   | 'INTERNAL_ERROR'
 
-export type CodigoErroFrontend = 'SEM_INTERNET' | 'CAMERA_NEGADA' | 'CAMERA_INDISPONIVEL' | 'ERRO_DESCONHECIDO'
+export type CodigoErroFrontend = 'SEM_INTERNET' | 'ERRO_DESCONHECIDO'
 
 export type CodigoErro = CodigoErroBackend | CodigoErroFrontend

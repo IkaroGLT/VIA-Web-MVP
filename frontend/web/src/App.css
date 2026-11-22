@@ -136,6 +136,23 @@
   outline-offset: 3px;
 }
 
+/* Botões de ação lado a lado (Descrever imagem + Falar um comando). */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Variante do botão de comando de voz: mesmas cores do sistema, fundo claro. */
+.action-button--secondary {
+  color: #174b83;
+  background: #ffffff;
+}
+
+.action-button--secondary:hover:not(:disabled) {
+  color: #ffffff;
+}
+
 .analysis-status {
   margin-top: 1rem;
   color: #174b83;

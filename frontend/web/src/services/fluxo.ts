@@ -1,38 +1,45 @@
 /**
- * O fluxo principal do VIA (VIA-08): toque -> foto -> IA -> voz.
+ * Descrição FALADA (VIA-08): liga o serviço de descrição (VIA-05) à voz (VIA-06)
+ * e ao registro de testes (VIA-09).
  *
- * Esta é a função que a tela chama quando a pessoa toca no botão.
- * Ela junta as peças:
- *   - camera.ts   (VIA-04, Ikaro)  tira a foto
- *   - api.ts      (VIA-08)         manda para o backend (VIA-05, Ikaro)
- *   - voz.ts      (VIA-06)         fala os avisos, a descrição e os erros
+ * Quem chama (a tela) passa a foto já preparada pela câmera (VIA-04).
+ * Esta função:
+ *   1. fala "Analisando a imagem";
+ *   2. pede a descrição ao backend (descriptionService.ts);
+ *   3. fala a descrição ou a frase do erro;
+ *   4. quando a fala termina, envia o registro do pedido para a planilha.
  *
- * No final devolve um "registro" do pedido (tempos e resultado, SEM a foto).
- * A VIA-09 vai enviar esse registro para a planilha.
+ * Ela devolve o resultado ASSIM QUE a descrição chega (para a tela mostrar o texto),
+ * sem esperar a fala acabar.
  */
 
-import { descreverImagem } from './api'
-import { capturarFoto } from './camera'
+import { describeImage, ErroDescricao } from './descriptionService'
 import { ESTADOS, mensagemDeErro } from './mensagens'
+import { enviarRegistro } from './registro'
 import { falar } from './voz'
 
 export type OrigemPedido = 'toque' | 'voz'
 
 /** Dados de um pedido, para o relatório de testes. Não contém a foto nem dados pessoais. */
 export interface RegistroPedido {
-  /** Data e hora do toque, em ISO (ex.: 2026-11-18T14:03:00.000Z). */
+  /** Data e hora do pedido, em ISO (ex.: 2026-11-18T14:03:00.000Z). */
   dataHora: string
-  /** Como o pedido foi feito: tocando na tela ou por comando de voz (VIA-07). */
+  /** Como o pedido foi feito: tocando no botão ou por comando de voz (VIA-07). */
   origem: OrigemPedido
-  /** 'sucesso' ou o código do erro (ex.: 'AI_TIMEOUT', 'CAMERA_NEGADA'). */
+  /** 'sucesso' ou o código do erro (ex.: 'AI_TIMEOUT'). */
   resultado: string
-  /** Do toque até a VOZ DA DESCRIÇÃO começar, em ms. É a métrica dos 15 s. null se não chegou a falar a descrição. */
+  /** Do pedido até a VOZ DA DESCRIÇÃO começar, em ms. É a métrica dos 15 s. null se não chegou a falar a descrição. */
   msAteVoz: number | null
-  /** Quanto o backend + IA demoraram, em ms. null se nem chegou a pedir. */
+  /** Quanto o backend + IA demoraram, em ms. */
   msIA: number | null
   /** A descrição foi falada até o fim? (definição de SUCESSO do projeto) */
   faladaAteOFim: boolean
 }
+
+export type ResultadoDescricaoFalada =
+  | { ok: true; descricao: string }
+  /** mensagem = texto para exibir na tela (o mesmo que foi falado). */
+  | { ok: false; mensagem: string }
 
 /** Última descrição recebida, para o comando "repetir" (VIA-07). */
 let ultimaDescricao: string | null = null
@@ -40,40 +47,38 @@ export function obterUltimaDescricao(): string | null {
   return ultimaDescricao
 }
 
-export async function pedirDescricao(origem: OrigemPedido): Promise<RegistroPedido> {
-  const toqueEm = performance.now()
-  const dataHora = new Date().toISOString()
-  const base = { dataHora, origem }
+export async function descreverEFalar(foto: File, origem: OrigemPedido): Promise<ResultadoDescricaoFalada> {
+  const pedidoEm = performance.now()
+  const base = { dataHora: new Date().toISOString(), origem }
 
-  // Não esperamos a frase acabar (não usamos await): a câmera trabalha enquanto o app fala.
-  void falar(ESTADOS.tirandoFoto)
-  const foto = await capturarFoto()
+  void falar(ESTADOS.analisando)
 
-  if (!foto.ok) {
-    await falar(mensagemDeErro(foto.codigo))
-    return { ...base, resultado: foto.codigo, msAteVoz: null, msIA: null, faladaAteOFim: false }
+  let descricao: string
+  try {
+    descricao = await describeImage(foto)
+  } catch (erro) {
+    const msIA = Math.round(performance.now() - pedidoEm)
+    const codigo = erro instanceof ErroDescricao ? erro.codigo : 'ERRO_DESCONHECIDO'
+    const frase = mensagemDeErro(codigo)
+    void falar(frase)
+    enviarRegistro({ ...base, resultado: codigo, msAteVoz: null, msIA, faladaAteOFim: false })
+    return { ok: false, mensagem: frase }
   }
 
-  // interromper = false: entra na fila depois de "Tirando a foto", sem cortá-la.
-  void falar(ESTADOS.analisando, false)
-  const pedidoIAEm = performance.now()
-  const resposta = await descreverImagem(foto.imagemBase64)
-  const msIA = Math.round(performance.now() - pedidoIAEm)
+  const msIA = Math.round(performance.now() - pedidoEm)
+  ultimaDescricao = descricao
 
-  if (!resposta.ok) {
-    await falar(mensagemDeErro(resposta.codigo))
-    return { ...base, resultado: resposta.codigo, msAteVoz: null, msIA, faladaAteOFim: false }
-  }
+  // A descrição corta o "Analisando" se ele ainda estiver tocando.
+  // O registro só é enviado quando a fala termina, para saber se foi ouvida até o fim.
+  void falar(descricao).then((fala) => {
+    enviarRegistro({
+      ...base,
+      resultado: 'sucesso',
+      msAteVoz: fala.inicioEm === null ? null : Math.round(fala.inicioEm - pedidoEm),
+      msIA,
+      faladaAteOFim: fala.terminou,
+    })
+  })
 
-  ultimaDescricao = resposta.descricao
-
-  // A descrição corta qualquer aviso que ainda esteja tocando: ela é o que importa.
-  const fala = await falar(resposta.descricao)
-  return {
-    ...base,
-    resultado: 'sucesso',
-    msAteVoz: fala.inicioEm === null ? null : Math.round(fala.inicioEm - toqueEm),
-    msIA,
-    faladaAteOFim: fala.terminou,
-  }
+  return { ok: true, descricao }
 }
