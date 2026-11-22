@@ -76,10 +76,16 @@ export async function consumeRateLimit(clientIp: string) {
           Math.ceil((result.reset - Date.now()) / 1000),
         ),
       }
-    } catch {
-      throw new RateLimitUnavailableError()
+    }catch (error) {
+        console.error('[VIA] Falha original no Upstash:', {
+          name: error instanceof Error ? error.name : 'UnknownError',
+          message: error instanceof Error ? error.message : 'Erro desconhecido',
+        })
+
+        throw new RateLimitUnavailableError()
+      }
     }
-  }
+
 
   const now = Date.now()
 
