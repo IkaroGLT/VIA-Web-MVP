@@ -52,7 +52,13 @@ function getDistributedLimiter(): Ratelimit | null {
   }
 
   if (url || token || isDeployed) {
-    throw new RateLimitUnavailableError()
+  console.error('[VIA] Configuração do rate limit:', {
+    hasUrl: Boolean(url),
+    hasToken: Boolean(token),
+    vercelEnv: process.env.VERCEL_ENV ?? 'undefined',
+  })
+
+  throw new RateLimitUnavailableError()
   }
 
   return null
