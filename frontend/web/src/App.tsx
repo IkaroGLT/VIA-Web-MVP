@@ -132,9 +132,9 @@ function App() {
       <header className="site-header">
         <a href="/" className="brand" aria-label="VIA - Página inicial">
           <img
-            className="brand__logo"
             src="/via-logo.jpg"
-            alt="VIA"
+            alt="VIA - Página inicial"
+            className="brand__logo"
           />
         </a>
 
