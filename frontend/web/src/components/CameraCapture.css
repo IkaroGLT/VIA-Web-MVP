@@ -1,13 +1,14 @@
 .camera-capture {
   box-sizing: border-box;
-  width: min(52rem, calc(100% - 2rem));
-  margin: 2rem auto;
+  width: 100%;
+  max-width: 68rem;
+  margin: 0 auto;
   padding: clamp(1rem, 3vw, 2rem);
-  color: #172033;
-  background: #ffffff;
-  border: 1px solid #d9dee8;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  color: #f4f5fb;
+  background: linear-gradient(145deg, #171a2a, #0d0f19);
+  border: 1px solid rgba(164, 170, 205, 0.16);
+  border-radius: 20px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
 }
 
 .camera-capture__header {
@@ -16,19 +17,22 @@
 
 .camera-capture__header h2 {
   margin: 0 0 0.5rem;
+  color: #f6f5ff;
+  font-family: "Manrope", sans-serif;
   font-size: 1.6rem;
-  color: #172033;
 }
 
 .camera-capture__header p {
+  color: #a3a8bc;
   line-height: 1.6;
 }
 
 .camera-capture__status {
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
-  color: #173b62;
-  background: #edf5ff;
+  color: #d9d4ff;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.2);
   border-radius: 8px;
   line-height: 1.5;
 }
@@ -36,9 +40,9 @@
 .camera-capture__error {
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
-  color: #9b1c1c;
-  background: #fff0f0;
-  border: 1px solid #f2b8b8;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.28);
   border-radius: 8px;
   line-height: 1.5;
 }
@@ -47,19 +51,20 @@
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 240px;
-  max-height: 60vh;
+  min-height: 360px;
+  max-height: 70vh;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #111827;
-  border-radius: 12px;
+  background: #080910;
+  border: 1px solid rgba(103, 232, 249, 0.16);
+  border-radius: 16px;
 }
 
 .camera-capture__media {
   display: block;
   width: 100%;
   height: 100%;
-  max-height: 60vh;
+  max-height: 70vh;
   object-fit: contain;
 }
 
@@ -69,7 +74,7 @@
 
 .camera-capture__placeholder {
   padding: 1rem;
-  color: #ffffff;
+  color: #a3a8bc;
   text-align: center;
 }
 
@@ -84,49 +89,51 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
+  min-height: 48px;
   padding: 0.7rem 1rem;
+  color: #e8e7f4;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(167, 139, 250, 0.36);
+  border-radius: 10px;
   font: inherit;
   font-weight: 600;
   text-align: center;
-  border: 2px solid transparent;
-  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .camera-capture__button--primary {
-  color: #ffffff;
-  background: #174b83;
+  color: #100d1d;
+  background: linear-gradient(100deg, #c4b5fd, #8b9cff 58%, #8cecf5);
+  border-color: transparent;
 }
 
 .camera-capture__button--primary:hover:not(:disabled) {
-  background: #10375f;
-}
-
-.camera-capture__button--secondary {
-  color: #174b83;
-  background: #edf3f9;
-  border-color: #c5d6e8;
+  filter: brightness(1.08);
 }
 
 .camera-capture__button--secondary:hover:not(:disabled) {
-  background: #dce9f5;
+  color: #ffffff;
+  background: rgba(167, 139, 250, 0.12);
+  border-color: #a78bfa;
 }
 
 .camera-capture__button--danger {
-  color: #ffffff;
-  background: #a52a2a;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.2);
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .camera-capture__button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 .camera-capture__button:focus-visible,
 .camera-capture__file-input:focus-visible {
-  outline: 3px solid #d49b20;
+  outline: 3px solid #67e8f9;
   outline-offset: 3px;
 }
 
@@ -143,8 +150,10 @@
 .camera-capture__file-info {
   padding: 1rem;
   margin-top: 1.25rem;
-  background: #f2f5f8;
-  border-radius: 8px;
+  color: #d6d7e5;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(164, 170, 205, 0.16);
+  border-radius: 10px;
   overflow-wrap: anywhere;
 }
 
@@ -154,12 +163,26 @@
 
 .camera-capture__privacy {
   margin-top: 1.25rem;
-  color: #596579;
+  color: #a3a8bc;
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
 @media (max-width: 600px) {
+  .camera-capture {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .camera-capture__preview {
+    min-height: 260px;
+    max-height: 55vh;
+  }
+
+  .camera-capture__media {
+    max-height: 55vh;
+  }
+
   .camera-capture__controls {
     flex-direction: column;
   }
