@@ -133,7 +133,7 @@ function App() {
         <a href="/" className="brand" aria-label="VIA - Página inicial">
           <img
             className="brand__logo"
-            src="/via-logo.png"
+            src="/via-logo.jpg"
             alt="VIA"
           />
         </a>
